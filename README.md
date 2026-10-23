@@ -1,18 +1,12 @@
 # DouYinLiquidTab
 
 DouYinLiquidTab 是适用于 LSPosed 的 Android 液态底栏模块。本构建只保留抖音适配：模块管理界面、
-统一玻璃渲染核心，以及抖音专属的底栏渲染与页面状态代码。应用 ID 为
-`io.github.xzdw.dylt`；1.6 起由 `io.github.offlineglass` 更名，两个包不共享配置。
+统一玻璃渲染核心，以及抖音专属的底栏渲染与页面状态代码。
 
 ## 下载
 
 [![Download APK](https://img.shields.io/badge/Download-1.7.4-2ea44f?logo=android&logoColor=white)](https://github.com/xzdw01/DouYinLiquidTab/releases/tag/v1.7.4)
 
-**[⬇️ 一键下载 DouYinLiquidTab 1.7.4 APK](https://github.com/xzdw01/DouYinLiquidTab/releases/download/v1.7.4/DouYinLiquidTab-1.7.4-release.apk)**
-
-- 版本：1.7.4（code 18）
-- SHA-256：`DDC5067CAD7BF8AA8FE0296F6549E2DB272F0AE38A09D56801942310953FD38B`
-- 安装前确认已启用 LSPosed 并勾选抖音；如果装过 debug/其它签名版本，先卸载再安装。
 
 ## 界面预览
 
@@ -142,10 +136,10 @@ Linux/macOS 下如果 `gradlew` 没有执行权限，先 `chmod +x gradlew`。
 pwsh -NoProfile -File tools/verify-adapter-workspaces.ps1
 ```
 
-Release 构建产物默认位于 `app/build/outputs/apk/release/`。工程不携带签名密钥，也不在源码中设置个人签名信息；发布者应使用自己的密钥签名，并安全保存密钥。
+Release 构建产物默认位于 `app/build/outputs/apk/release/`。
 
 ## 开源与第三方材料
 
-DouYinLiquidTab 源码按 GNU GPL v3 发布，完整文本见 `LICENSE`。直接依赖及授权说明见 `NOTICE.md`。随 APK 使用的若干应用导航图标属于第三方应用素材，详见 `THIRD_PARTY_ASSETS.md`；本项目许可证不授予这些素材的额外权利。请在公开分发前确认相关素材的授权范围。
+DouYinLiquidTab 源码按 GNU GPL v3 发布，完整文本见 `LICENSE`。直接依赖及授权说明见 `NOTICE.md`。随 APK 使用的若干应用导航图标属于第三方应用素材，详见 `THIRD_PARTY_ASSETS.md`。
 
-本工程不包含第三方应用 APK、反编译输出、用户数据、签名密钥或设备调试记录。赞赏码由项目作者提供，仅用于模块说明页。
+本工程不包含第三方应用 APK、反编译输出、用户数据、签名密钥或设备调试记录。
