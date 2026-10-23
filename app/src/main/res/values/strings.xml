@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">DYLT</string>
+    <!-- Module description: the libxposed metadata spec reads android:description. -->
+    <string name="xposed_description">为你的抖音开启液态玻璃材质</string>
+</resources>
