@@ -4,6 +4,16 @@ LiquidTab 是适用于 LSPosed 的 Android 液态底栏模块。本构建只保�
 统一玻璃渲染核心，以及抖音专属的底栏渲染与页面状态代码。应用 ID 为
 `io.github.xzdw.dylt`；1.6 起由 `io.github.offlineglass` 更名，两个包不共享配置。
 
+## 下载
+
+[![Download APK](https://img.shields.io/badge/Download-1.7.4-2ea44f?logo=android&logoColor=white)](https://github.com/xzdw01/DouYinLiquidTab/releases/tag/v1.7.4)
+
+**[⬇️ 一键下载 LiquidTab 1.7.4 APK](https://github.com/xzdw01/DouYinLiquidTab/releases/download/v1.7.4/DouYinLiquidTab-1.7.4-release.apk)**
+
+- 版本：1.7.4（code 18）
+- SHA-256：`DDC5067CAD7BF8AA8FE0296F6549E2DB272F0AE38A09D56801942310953FD38B`
+- 安装前确认已启用 LSPosed 并勾选抖音；如果装过 debug/其它签名版本，先卸载再安装。
+
 ## 运行条件
 
 - Android 15（API 35）或更高版本
