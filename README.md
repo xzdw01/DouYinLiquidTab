@@ -3,8 +3,6 @@
 LiquidTab 是适用于 LSPosed 的 Android 液态底栏模块。本构建只保留抖音适配：模块管理界面、
 统一玻璃渲染核心，以及抖音专属的底栏渲染与页面状态代码。
 
-![Uploading 1792586916817.png…]()![Uploading Screenshot_2026-10-21-20-13-59-83_2332cb9b27b851.jpg…]()
-
 
 
 ## 下载
