@@ -1,20 +1,31 @@
 # LiquidTab
 
 LiquidTab 是适用于 LSPosed 的 Android 液态底栏模块。本构建只保留抖音适配：模块管理界面、
-统一玻璃渲染核心，以及抖音专属的底栏渲染与页面状态代码。
-
-
+统一玻璃渲染核心，以及抖音专属的底栏渲染与页面状态代码。应用 ID 为
+`io.github.xzdw.dylt`；1.6 起由 `io.github.offlineglass` 更名，两个包不共享配置。
 
 ## 下载
 
 [![Download APK](https://img.shields.io/badge/Download-1.7.4-2ea44f?logo=android&logoColor=white)](https://github.com/xzdw01/DouYinLiquidTab/releases/tag/v1.7.4)
 
+**[⬇️ 一键下载 LiquidTab 1.7.4 APK](https://github.com/xzdw01/DouYinLiquidTab/releases/download/v1.7.4/DouYinLiquidTab-1.7.4-release.apk)**
+
+- 版本：1.7.4（code 18）
+- SHA-256：`DDC5067CAD7BF8AA8FE0296F6549E2DB272F0AE38A09D56801942310953FD38B`
+- 安装前确认已启用 LSPosed 并勾选抖音；如果装过 debug/其它签名版本，先卸载再安装。
+
+## 界面预览
+
+| 模块管理界面 | 抖音底栏效果 |
+| --- | --- |
+| ![模块管理界面](assets/preview-1.png) | ![抖音底栏效果](assets/preview-2.jpg) |
 
 ## 运行条件
 
 - Android 15（API 35）或更高版本
 - 已安装并启用 LSPosed；LiquidTab 的作用域为抖音
-- **需要支持 libxposed 模块 API 的 LSPosed**
+- **需要支持 libxposed 模块 API 的 LSPosed**（模块只提供新入口 `META-INF/xposed/java_init.list`，
+  旧的 `assets/xposed_init` 入口与其 `de.robv` API 已移除）
 - 激活状态由 LSPosed 的模块服务（libxposed service API 101 及以上）上报，模块自身不记录激活时间；
   服务/作用域/正在被 Hook 的进程都直接来自框架
 - 建议每次设置应用适配后重启目标应用进程
