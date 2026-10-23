@@ -1,6 +1,6 @@
-# LiquidTab
+# DouYinLiquidTab
 
-LiquidTab 是适用于 LSPosed 的 Android 液态底栏模块。本构建只保留抖音适配：模块管理界面、
+DouYinLiquidTab 是适用于 LSPosed 的 Android 液态底栏模块。本构建只保留抖音适配：模块管理界面、
 统一玻璃渲染核心，以及抖音专属的底栏渲染与页面状态代码。应用 ID 为
 `io.github.xzdw.dylt`；1.6 起由 `io.github.offlineglass` 更名，两个包不共享配置。
 
@@ -8,7 +8,7 @@ LiquidTab 是适用于 LSPosed 的 Android 液态底栏模块。本构建只保�
 
 [![Download APK](https://img.shields.io/badge/Download-1.7.4-2ea44f?logo=android&logoColor=white)](https://github.com/xzdw01/DouYinLiquidTab/releases/tag/v1.7.4)
 
-**[⬇️ 一键下载 LiquidTab 1.7.4 APK](https://github.com/xzdw01/DouYinLiquidTab/releases/download/v1.7.4/DouYinLiquidTab-1.7.4-release.apk)**
+**[⬇️ 一键下载 DouYinLiquidTab 1.7.4 APK](https://github.com/xzdw01/DouYinLiquidTab/releases/download/v1.7.4/DouYinLiquidTab-1.7.4-release.apk)**
 
 - 版本：1.7.4（code 18）
 - SHA-256：`DDC5067CAD7BF8AA8FE0296F6549E2DB272F0AE38A09D56801942310953FD38B`
@@ -16,14 +16,70 @@ LiquidTab 是适用于 LSPosed 的 Android 液态底栏模块。本构建只保�
 
 ## 界面预览
 
-| 模块管理界面 | 抖音底栏效果 |
-| --- | --- |
-| ![模块管理界面](assets/preview-1.png) | ![抖音底栏效果](assets/preview-2.jpg) |
+### 模块管理界面
+
+![模块管理界面](assets/preview-1.png)
+
+### 抖音底栏效果
+
+![抖音底栏效果](assets/preview-2.jpg)
+
+## 工作原理
+
+DouYinLiquidTab 不修改抖音的 APK，也不替换 Activity。它通过 LSPosed 在抖音进程内注入一个自定义 View（`GlassHostLayout`），由这个 View 接管底栏/顶栏的绘制与触摸；抖音原生栏仍然保留，只是被隐藏并当作数据源。
+
+1. **注入**
+   LSPosed 按 `scope.list` 把模块加载进 `com.ss.android.ugc.aweme`。`META-INF/xposed/java_init.list` 指向 `LiquidTabModule`，在 `onPackageReady` 中安装 Hook；`HookCoordinator` 等待 Activity/窗口就绪后调用 `GlassInstaller`。
+
+2. **绑定原生栏**
+   `GlassInstaller` 在 DecorView/内容树中找到抖音底栏所在的父容器，把 `GlassHostLayout` 作为兄弟 View 加进去，并隐藏原生栏的可见性和触摸。原生栏的子 View（图标、文字、选中态、未读红点）仍可读取，作为模块绘制的数据源。
+
+3. **绘制玻璃**
+   `GlassHostLayout` 在栏区域绘制玻璃面板、选中胶囊、图标和文字。背景来源有三种：原生栏的 RenderNode 快照、TextureView 的实时视频帧、SurfaceView 的 SurfaceControl 捕获；再通过 `RenderEffect` + `RuntimeShader` 做模糊、折射和色散。顶栏复用同一套宿主能力，只是槽位和几何不同。
+
+4. **交互回传**
+   触摸、长按、拖动由 `GlassHostLayout` 处理。松手时通过原生 tab 的 `performClick()` 把选择回传给抖音；页面切换、返回栈、评论面板、视频播放仍由抖音自己完成，模块只改变“栏长什么样、点哪里”。
+
+5. **页面适配**
+   `DouyinPageController` 周期性检查当前页面类型、原生栏是否离屏、评论 sheet 是否打开，动态调整页面底部/顶部边距和控件抬升；`DouyinNavigationState` 把原生栏状态（选中项、标签、红点、是否静态）整理成渲染器可消费的快照。
+
+6. **配置下发**
+   管理端 Compose 界面写入 `SettingsProvider` / remote preferences；抖音进程里的 `HookConfigReader` 读取配置并推给宿主、渲染器和页面控制器，修改实时生效。
+
+## 实现方式
+
+### 代码分层
+
+| 层 | 主要文件 | 职责 |
+| --- | --- | --- |
+| 模块入口 | `hook/LiquidTabModule.kt`、`hook/HookInstaller.kt`、`hookx/Xposed.kt` | libxposed 入口、Hook 安装、框架调用封装 |
+| 共享宿主 | `hook/GlassHostLayout.kt` | 玻璃面板/胶囊绘制、触摸、弹簧动画、背景捕获、RenderEffect |
+| 抖音适配 | `hook/adapters/douyin/` | 原生栏绑定、槽位/图标/标签、顶栏、页面状态、视频采样 |
+| 配置 | `config/`、`hook/HookConfigReader.kt` | 配置协议、默认值、持久化、进程内读取 |
+| 管理界面 | `ui/GlassUi.kt`、`ui/liquid/` | 设置页、预览、液体组件 |
+| 渲染基础 | `rendering/` | 模糊、RuntimeShader、材质 |
+
+### 抖音适配的关键实现
+
+- `DouyinAdapter` / `TargetSpec`：声明抖音底栏的槽位、入口名称、图标和隐藏位；`bottomBarHideOptions()` 与管理页共用这张表。
+- `DouyinNavigationState`：把原生栏的选中项、标签、红点、静态帧/视频帧状态整理成渲染器可消费的快照。
+- `DouyinNavigationRenderer`：绘制底栏图标、文字、选中胶囊、强调色彩虹边和未读红点。
+- `DouyinTopBarState` / `DouyinTopBarRenderer` / `DouyinTopTabMenu`：顶栏标签、按钮隐藏、排序和菜单。
+- `DouyinPageController`：处理 feed / 消息 / 商城 / 经验 / 评论等页面的 lift、边距、原生栏离屏和黑边。
+- `DouyinVideoSampler` / `DouyinPlayerTextureHooks`：视频栏后景采样，支持 TextureView 实时帧和 SurfaceView 捕获回退。
+
+### 性能设计
+
+- 静止、黑边或静态填充视频时，停止视频驱动的重绘和 `Choreographer` watcher；
+- 可复用的静态层/场景会缓存，避免不必要的 display list 重录；
+- 视频捕获只取栏区域并降采样，静态时停采；
+- 探针和未读红点扫描有 TTL / 节流，避免空转；
+- 渲染器复用 `Paint`、`FontMetrics`、颜色和路径，减少每帧分配。
 
 ## 运行条件
 
 - Android 15（API 35）或更高版本
-- 已安装并启用 LSPosed；LiquidTab 的作用域为抖音
+- 已安装并启用 LSPosed；DouYinLiquidTab 的作用域为抖音
 - **需要支持 libxposed 模块 API 的 LSPosed**（模块只提供新入口 `META-INF/xposed/java_init.list`，
   旧的 `assets/xposed_init` 入口与其 `de.robv` API 已移除）
 - 激活状态由 LSPosed 的模块服务（libxposed service API 101 及以上）上报，模块自身不记录激活时间；
@@ -90,6 +146,6 @@ Release 构建产物默认位于 `app/build/outputs/apk/release/`。工程不携
 
 ## 开源与第三方材料
 
-LiquidTab 源码按 GNU GPL v3 发布，完整文本见 `LICENSE`。直接依赖及授权说明见 `NOTICE.md`。随 APK 使用的若干应用导航图标属于第三方应用素材，详见 `THIRD_PARTY_ASSETS.md`；本项目许可证不授予这些素材的额外权利。请在公开分发前确认相关素材的授权范围。
+DouYinLiquidTab 源码按 GNU GPL v3 发布，完整文本见 `LICENSE`。直接依赖及授权说明见 `NOTICE.md`。随 APK 使用的若干应用导航图标属于第三方应用素材，详见 `THIRD_PARTY_ASSETS.md`；本项目许可证不授予这些素材的额外权利。请在公开分发前确认相关素材的授权范围。
 
 本工程不包含第三方应用 APK、反编译输出、用户数据、签名密钥或设备调试记录。赞赏码由项目作者提供，仅用于模块说明页。
